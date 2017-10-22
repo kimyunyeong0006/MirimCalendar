@@ -4,11 +4,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
-import java.util.Date;
+import android.util.Log;
 
 /**
- * Created by KJY on 2017-10-20.
+ * Created by KJY on 2017-10-22.
  */
 
 public class DBHelper extends SQLiteOpenHelper {
@@ -32,48 +31,62 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
-    public void insert(String name, Date start, Date dead) {
+    public void insert(String name, String start, String dead) {
+        Log.v("DB 입력", "DB 입력");
         // 읽고 쓰기가 가능하게 DB 열기
         SQLiteDatabase db = getWritableDatabase();
         // DB에 입력한 값으로 행 추가
+
         db.execSQL("INSERT INTO PROJECT VALUES(null, '" + name + "', " +start+ ", " + dead + ");");
+
         db.close();
     }
 
-    public void update(String item, int price) {
-        SQLiteDatabase db = getWritableDatabase();
-        // 입력한 항목과 일치하는 행의 가격 정보 수정
-        db.execSQL("UPDATE MONEYBOOK SET price=" + price + " WHERE item='" + item + "';");
-        db.close();
-    }
+//    public void update(String item, int price) {
+//        SQLiteDatabase db = getWritableDatabase();
+//        // 입력한 항목과 일치하는 행의 가격 정보 수정
+//        db.execSQL("UPDATE MONEYBOOK SET price=" + price + " WHERE item='" + item + "';");
+//        db.close();
+//    }
+//
+//    public void delete(String item) {
+//        SQLiteDatabase db = getWritableDatabase();
+//        // 입력한 항목과 일치하는 행 삭제
+//        db.execSQL("DELETE FROM MONEYBOOK WHERE item='" + item + "';");
+//        db.close();
+//    }
 
-    public void delete(String item) {
-        SQLiteDatabase db = getWritableDatabase();
-        // 입력한 항목과 일치하는 행 삭제
-        db.execSQL("DELETE FROM MONEYBOOK WHERE item='" + item + "';");
-        db.close();
-    }
+    public String[][] getResult() {
 
-    public String getResult() {
+
         // 읽기가 가능하게 DB 열기
         SQLiteDatabase db = getReadableDatabase();
-        String result = "";
+
+        Cursor num = db.rawQuery("SELECT count(*) FROM PROJECT", null);
+        int count = 0;
+        if (num.moveToFirst()) {
+
+            count = Integer.parseInt(num.getString(0));
+        }
+
+
+        String[][] result = new String[count][4];
+
 
         // DB에 있는 데이터를 쉽게 처리하기 위해 Cursor를 사용하여 테이블에 있는 모든 데이터 출력
-        Cursor cursor = db.rawQuery("SELECT * FROM MONEYBOOK", null);
-        while (cursor.moveToNext()) {
-            result += cursor.getString(0)
-                    + " : "
-                    + cursor.getString(1)
-                    + " | "
-                    + cursor.getInt(2)
-                    + "원 "
-                    + cursor.getString(3)
-                    + "\n";
+        Cursor cursor = db.rawQuery("SELECT * FROM PROJECT", null);
+
+        if(cursor.moveToFirst()) {
+            for (int i = 0; i < count; i++) {
+                for (int j = 0; j < 4; j++) {
+                    result[i][j] = cursor.getString(j);
+                }
+                if (!cursor.moveToNext())
+                    break;
+            }
         }
+
 
         return result;
     }
 }
-
-
